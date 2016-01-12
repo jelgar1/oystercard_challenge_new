@@ -5,11 +5,10 @@ class Oystercard
   attr_reader :balance, :current_journey, :journey_log
 
   MAXIMUM_BALANCE = 100
-  DEFAULT_FARE = 1
 
   def initialize
     @balance = 0
-    @current_journey = {}
+    @current_journey = nil
     @journey_log = {}
   end
 
@@ -19,32 +18,33 @@ class Oystercard
   end
 
   def touch_in(station)
-    fail "you have less than #{Oystercard::DEFAULT_FARE} remaining, please top up!" if balance - DEFAULT_FARE < 0
-    @current_journey[:entry_station] = station
+    fail "you have less than #{Journey::DEFAULT_FARE} remaining, please top up!" if balance - Journey::DEFAULT_FARE < 0
+    @current_journey = Journey.new
+    @current_journey.update_entry_station(station)
   end
 
   def touch_out(station)
+    @current_journey.update_exit_station(station)
     deduct
-    @current_journey[:exit_station] = station
-    update_history
+    update_journey_log
   end
 
   def in_journey?
-    current_journey[:entry_station] != nil
+    current_journey != nil
   end
 
   private
-  def deduct(fare=DEFAULT_FARE)
-    @balance -= fare
+  def deduct
+    @balance -= @current_journey.fare
   end
 
-  def update_history
-    journey_log[:"journey#{index}"] = current_journey
+  def update_journey_log
+    @journey_log[:"journey#{index}"] = @current_journey
     reset_current_journey
   end
 
   def reset_current_journey
-    @current_journey = {}
+    @current_journey = nil
   end
 
   def index

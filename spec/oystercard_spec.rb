@@ -5,17 +5,14 @@ describe Oystercard do
   subject(:oystercard) {described_class.new}
   let(:entry_station) {double :station}
   let(:exit_station) {double :station}
+  let(:journey) {double :journey}
 
   it 'has an initial balance of zero' do
     expect(oystercard.balance).to eq(0)
   end
 
-  it 'is initially not in a journey' do
-    expect(oystercard.in_journey?).to eq(false)
-  end
-
   it 'raises an error if the card does not have the minimum amount for a journey' do
-    expect{oystercard.touch_in(entry_station)}.to raise_error "you have less than #{Oystercard::DEFAULT_FARE} remaining, please top up!"
+    expect{oystercard.touch_in(entry_station)}.to raise_error "you have less than #{Journey::DEFAULT_FARE} remaining, please top up!"
   end
 
   it 'initially has an empty list of journeys' do
@@ -45,7 +42,7 @@ describe Oystercard do
       end
 
       it 'charges for the journey when card is touched out' do
-        expect{ subject.touch_out(exit_station) }.to change{ subject.balance }.by(-Oystercard::DEFAULT_FARE)
+        expect{ subject.touch_out(exit_station) }.to change{ subject.balance }.by(-Journey::DEFAULT_FARE)
       end
 
       context 'user has touched out' do
@@ -58,11 +55,11 @@ describe Oystercard do
         end
 
         it 'resets the current_journey on touch out' do
-          expect(oystercard.current_journey).to eq({})
+          expect(oystercard.current_journey).to eq(nil)
         end
-
         it 'stores a journey' do
-          expect(oystercard.journey_log[:"journey1"]).to eq({:entry_station => entry_station, :exit_station => exit_station})
+          binding.pry
+          expect(oystercard.journey_log[:"journey1"]).to be_instance_of(Journey)
         end
       end
     end

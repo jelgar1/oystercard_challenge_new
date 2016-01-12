@@ -1,3 +1,5 @@
+require_relative 'oystercard'
+
 class Station
 
   attr_reader :name, :zone
